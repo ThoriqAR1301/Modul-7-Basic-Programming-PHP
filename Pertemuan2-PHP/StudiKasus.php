@@ -52,21 +52,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
             $bonus = 0;
         }
 
+        $persen = $pajak / 100;
+        $potongan_pajak = $gaji_pokok * $persen;
+        $gaji_bersih = $gaji_pokok - $potongan_pajak + $bonus;
+
         function rupiah($angka){
             $hasil_rupiah = "Rp " . number_format($angka, 2, ',','.');
             return $hasil_rupiah;
         }
-
-        $_SESSION['jabatanList'][] = [
-            'jabatan' => $jabatan,
-            'jam_kerja' => $jam_kerja,
-        ];
     }
 }
 
-$persen = $pajak / 100;
-$potongan_pajak = $gaji_pokok * $persen;
-$gaji_bersih = $gaji_pokok - $potongan_pajak + $bonus;
+$_SESSION['jabatanList'][] = [
+    'nama_karyawan' => $nama,
+    'jabatan' => $jabatan,
+    'jam_kerja' => $jam_kerja,
+];
 
 if (isset($_POST['hapus_data'])){
     session_destroy();
