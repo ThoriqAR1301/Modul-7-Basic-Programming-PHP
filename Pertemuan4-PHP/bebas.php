@@ -15,8 +15,14 @@
     $nilai_uas = "";
     $predikat = "";
     $hasil = "";
-    $delete = "";
     
+    // isset() Memeriksa apakah variabel ada atau tidak bernilai null
+    // Mengembalikan true jika variabel ada dan tidak null
+
+    // !isset() Memeriksa apakah variabel tidak ada atau bernilai null
+    // Mengembalikan true jika variabel tidak ada atau null
+
+    // session : Digunakan untuk menyimpan data sementara yang dapat diakses oleh pengguna selama periode tertentu
 
     if (isset($_POST['hitung_nilai'])){
         $nama_siswa = $_POST['nama_siswa'];
