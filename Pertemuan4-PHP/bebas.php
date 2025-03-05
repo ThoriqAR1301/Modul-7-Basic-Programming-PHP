@@ -24,6 +24,55 @@
 
     // session : Digunakan untuk menyimpan data sementara yang dapat diakses oleh pengguna selama periode tertentu
 
+    // Inisialisasi sesi untuk menyimpan data siswa
+    session_start();
+
+    // Memeriksa apakah $_SESSION['siswaList'] sudah ada dalam sesi atau belum
+    if (!isset($_SESSION['siswaList'])){ // True
+        $_SESSION['siswaList'] = []; // Jika kondisi true, maka akan dibuatkan array kosong
+    }
+
+    if ($_SERVER["REQUEST_METHOD"] == "POST"){
+        // Cek apakah inputan form ada dan tidak kosong
+        if(isset($_POST['nama_siswa']) && isset($_POST['nilai_tugas']) && isset($_POST['nilai_uts']) && isset($_POST['nilai_uas'])){
+
+            // Ambil imputan dari form
+            $nama_siswa = $_POST['nama_siswa'];
+            $nilai_tugas = $_POST['nilai_tugas'];
+            $nilai_uts = $_POST['nilai_uts'];
+            $nilai_uas = $_POST['nilai_uas'];
+
+            // Hitung nilai akhir
+            $hasil = ((30 / 100) * $nilai_tugas) + ((30 / 100) * $nilai_uts) + ((40 / 100) * $nilai_uas);
+
+            // Tentukan kategori nilai
+            switch ($hasil){
+                case $hasil >= 85:
+                    $predikat = "A";
+                    break;
+                case $hasil >= 70:
+                    $predikat = "B";
+                    break;
+                case $hasil >= 60:
+                    $predikat = "C";
+                    break;
+                case $hasil >= 50:
+                    $predikat = "D";
+                    break;
+                default:
+                    $predikat = "E";
+                    break;
+            }
+
+            // Simpan data ke dalam sesi
+            $_SESSION['siswaList'][] = [
+                'nama_siswa' => $nama_siswa,
+                'hasil' => $hasil, // Sesuaikan dengan var masing-masing
+                'predikat' => $predikat, // Sesuaikan dengan var masing-masing
+            ];
+        }
+    }
+
     if (isset($_POST['hitung_nilai'])){
         $nama_siswa = $_POST['nama_siswa'];
         $nilai_tugas = $_POST['nilai_tugas'];
@@ -49,6 +98,14 @@
             $predikat = "E";
             break;
     }
+
+    // Cek jika tombol hapus data di klik, maka sesia akan dihancurkan
+    if (isset($_POST['hapus_data'])){
+        session_destroy(); // Hapus seluruh data sesi
+        session_start();
+        $_SESSION['siswaList'] = [];
+    }
+
     ?>
 
     <div class="container flex justify-center items-center">
@@ -64,33 +121,34 @@
             </form>
         </div>
         <div class="container2">
-            <div class="bg-white p-8 rounded-lg shadow-lg w-175 ml-5 h-75">
+            <div class="bg-white p-8 rounded-lg shadow-lg w-175 ml-5">
                 <h2 class="text-2xl font-semibold text-center mb-5">Hasil Penilaian</h2>
 
                 <table class="border-collapse border border-gray-400 w-full text-center p-10">
                     <thead>
                         <tr>
                             <td class="bg-black text-white border-gray-300 text-lg p-5">Nama</td>
-                            <td class="bg-black text-white border-gray-300 text-lg p-5">Nilai Tugas</td>
-                            <td class="bg-black text-white border-gray-300 text-lg p-5">Nilai UTS</td>
-                            <td class="bg-black text-white border-gray-300 text-lg p-5">Nilai UAS</t>
                             <td class="bg-black text-white border-gray-300 text-lg p-5">Nilai Akhir</td>
                             <td class="bg-black text-white border-gray-300 text-lg p-5">Kategori</td>
                         </tr>
                     </thead>
                     <tbody>
+                        <!-- Memanggil isi array -->
+                        <?php foreach($_SESSION['siswaList'] as $List): ?>
                         <tr>
-                            <td class="border border-gray-500 p-5 text-md"><?php echo $nama_siswa; ?></td>
-                            <td class="border border-gray-500 p-5 text-md"><?php echo $nilai_tugas; ?></td>
-                            <td class="border border-gray-500 p-5 text-md"><?php echo $nilai_uts; ?></td>
-                            <td class="border border-gray-500 p-5 text-md"><?php echo $nilai_uas; ?></td>
-                            <td class="border border-gray-500 p-5 text-md"><?php echo $hasil; ?></td>
-                            <td class="border border-gray-500 p-5 text-md"><?php echo $predikat; ?></td>
+                            <td class="border border-gray-500 p-5 text-md"><?= ($List['nama_siswa']) ?></td>
+                            <td class="border border-gray-500 p-5 text-md"><?= ($List['hasil']); ?></td>
+                            <td class="border border-gray-500 p-5 text-md"><?= ($List['predikat']) ?></td>
                         </tr>
+                        <?php endforeach;?>
                     </tbody>
                 </table>
             </div>
-            <input type="submit" name="hapus_data" value="Hapus Semua Data" class="ml-5 w-175 p-3 mb-4 bg-red-500 text-white text-md rounded-md mt-5 hover:bg-red-200 cursor-pointer transition duration-500 text-center hover:text-black">
+            
+            <!-- Tombol untuk menghapus data sesi -->
+            <form method="POST">
+                <button type="submit" name="hapus_data" class="ml-5 w-175 p-3 mb-4 bg-red-500 text-white text-md rounded-md mt-5 hover:bg-red-200 cursor-pointer transition duration-500 text-center hover:text-black">Hapus Semua Data</button>
+            </form>
         </div>
     </div>
 </body>
