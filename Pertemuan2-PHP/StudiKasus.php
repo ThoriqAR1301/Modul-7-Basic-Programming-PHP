@@ -1,124 +1,201 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Studi Kasus</title>
-    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-</head>
-<body class="bg-stone-300 flex items-center justify-center min-h-screen">
-
 <?php
+$Nama = " ";
+$jabatan = ""; 
+$jamkerja = "" ;
+$gaji  = "";
+$pajak = "";
+$bonus = "";
+$potongan = "";
+$gaji_bersih = "";
 
-$nama = "";
-$jabatan = "";
-$jam_kerja = "";
+
+// isset() memeriksa apakah variabel ada dan tidak bernilai null.
+//         mengembalikan true jika variabel ada dan tidak bernilai null.
+// !isset() memeriksa apakah variabel tidak ada atau bernilai null.
+//         mengembalikan true jika variabel tidak ada atau null.
+// session: digunakan untuk menyimpan data sementara yang dapat diakses oleh pengguna selama periode tertentu.
+
+//inisialisasi sesi unt8uk menyimpan data siswa
 
 session_start();
-
-if (!isset($_SESSION['jabatanList'])){
-    $_SESSION['jabatanList'] = [];
+//memeriksa apakah $_SESSION['siswa'] sudah ada atau belum
+//jika belum, maka inisialisasi $_SESSION['siswa'] sebagai array kosong
+if (!isset($_SESSION['Karyawan'])) {//true
+    $_SESSION['Karyawan'] = []; //jika kondisi true maka akan dibuatkan array kosong
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST"){
-    if(isset($_POST['nama_karyawan']) && ($_POST['jabatan']) && isset($_POST['jam_kerja'])){
-
-        $nama = $_POST['nama_karyawan'];
+if($_SERVER["REQUEST_METHOD"] == "POST"){
+    //cek apakah inputan form ada dan tidak kosong
+    if(isset($_POST['jabatan']) && isset($_POST['jamkerja'])){
+        //ambil input dari form
+        $Nama = $_POST['Nama'];
         $jabatan = $_POST['jabatan'];
-        $jam_kerja = $_POST['jam_kerja'];
+        $jamkerja = $_POST['jamkerja'];
 
-        if ($jabatan == "Manager"){
+        if ($jabatan == 1) {
             $jabatan = "Manager";
-            $gaji_pokok = 7000000;
-        } elseif ($jabatan == "Supervisor"){
+            $gaji = 7000000;
+        }elseif ($jabatan == 2) {
             $jabatan = "Supervisor";
-            $gaji_pokok = 5000000;
-        } elseif ($jabatan == "Staff"){
-            $jabatan = "Staff";
-            $gaji_pokok = 3000000;
+            $gaji = 5000000;
+        }elseif ($jabatan == 3) {
+            $jabatan = "Staff" ;
+            $gaji = 3000000;
         }
 
-        if ($gaji_pokok <= 3000000){
+        if ($gaji <= 3000000) {
             $pajak = 5;
-        } elseif ($gaji_pokok >= 3000000 && $gaji_pokok <= 5000000){
+        }elseif ($gaji >= 3000000 && $gaji <= 5000000) {
             $pajak = 10;
-        } elseif ($gaji_pokok >= 5000000){
+        }elseif ($gaji >= 5000000) {
             $pajak = 15;
         }
 
-        if ($jam_kerja > 200){
-            $bonus = ($jam_kerja - 200) * 20000;
-        } else {
+        $jam_bonus = $jamkerja - 200;
+
+        if ($jam_bonus >= 1) {
+            $bonus = $jam_bonus * 20000;
+            $ucapan_bonus = "Selamat Anda Mendapatkan Bonus Karena Jam Kerja Anda lebih $jam_bonus jam dari 200 jam kerja <br>";
+        } else{
             $bonus = 0;
+            $ucapan_bonus = "Maaf Anda Belum Mendapatkan Bonus Karena Jam Kerja Anda Kurang Dari 200 Jam Kerja <br>";
         }
 
-        $persen = $pajak / 100;
-        $potongan_pajak = $gaji_pokok * $persen;
-        $gaji_bersih = $gaji_pokok - $potongan_pajak + $bonus;
+        $persenan = $pajak / 100 ;
+        $potongan = $gaji * $persenan;
+        $gaji_bersih = $gaji - $potongan + $bonus;
 
         function rupiah($angka){
-            $hasil_rupiah = "Rp " . number_format($angka, 2, ',','.');
+            
+            $hasil_rupiah = "Rp " . number_format($angka,2,',','.');
             return $hasil_rupiah;
-        }
+        
+        };
+        echo "Nama :" . $Nama . "<br>";
+        echo "Jabatan :" . $jabatan . "<br>";
+        echo "Gaji Pokok :" . rupiah ($gaji) . "<br>";
+        echo "Pajak :" . rupiah ($potongan) . "<br>";
+        echo $ucapan_bonus;
+        echo "Bonus :" . rupiah ($bonus) . "<br>";
+        echo "Gaji Bersih :" . rupiah ($gaji_bersih) . "<br>";
+
     }
 }
 
-$_SESSION['jabatanList'][] = [
-    'nama_karyawan' => $nama,
+//simpan data siswa ke dalam session
+$_SESSION['Karyawan'][] = [
+    'Nama' => $Nama,
     'jabatan' => $jabatan,
-    'jam_kerja' => $jam_kerja,
+    'jamkerja' => $jamkerja,
+    'gaji' => $gaji,
+    'pajak' => $pajak,
+    'bonus' => $bonus,
+    'potongan' => $potongan,
+    'gaji_bersih' => $gaji_bersih
 ];
 
-if (isset($_POST['hapus_data'])){
-    session_destroy();
-    session_start();
-    $_SESSION['jabatanList'] = [];
+if(isset($_POST['hapus_data'])){
+    session_destroy(); //hapus semua data sesi
+
+    session_start(); //buat sesi baru
+    $_SESSION['Karyawan'] = []; //inisialisasi kembali data karyawan
 }
 
+
 ?>
+<!DOCTYPE html>
+<html lang="id">
 
-    <div class="container flex justify-center items-center">
-        <div class="bg-white p-8 rounded-lg shadow-lg w-96">
-            <h2 class="text-2xl font-semibold text-center mb-5">Sistem Perhitungan Gaji Karyawan</h2>
 
-            <form action="" method="POST">
-                <label class="text-lg font-semibold text-left">Nama Karyawan</label><input type="text" name="nama_siswa" class="w-full p-3 mb-4 border border-gray-300 rounded-md mt-1" autocomplete="off">
-                <label class="text-lg font-semibold text-left">Jabatan</label><input type="text" name="nama_siswa" class="w-full p-3 mb-4 border border-gray-300 rounded-md mt-1" autocomplete="off">
-                <label class="text-lg font-semibold text-left">Jam Kerja</label><input type="" name="nilai_tugas" class="w-full p-3 mb-4 border border-gray-300 rounded-md mt-1" autocomplete="off">
-                <input type="submit" name="hitung_nilai" value="Kategorikan" class="w-full p-3 mb-4 bg-blue-500 text-white text-md rounded-md mt-2 hover:bg-blue-200 cursor-pointer transition duration-500 hover:text-black">
-            </form>
-        </div>
-        <div class="container2">
-            <div class="bg-white p-8 rounded-lg shadow-lg w-175 ml-5">
-                <h2 class="text-2xl font-semibold text-center mb-5">Hitung Gaji</h2>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Penilaian siswa</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
 
-                <table class="border-collapse border border-gray-400 w-full text-center p-10">
-                    <thead>
-                        <tr>
-                            <td class="bg-black text-white border-gray-300 text-lg p-5">Nama</td>
-                            <td class="bg-black text-white border-gray-300 text-lg p-5">Jabatan</td>
-                            <td class="bg-black text-white border-gray-300 text-lg p-5">Jam Kerja</td>
-                            <td class="bg-black text-white border-gray-300 text-lg p-5">Gaji</td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Memanggil isi array -->
-                        <?php foreach($_SESSION['jabatanList'] as $List): ?>
-                        <tr>
-                            <td class="border border-gray-500 p-5 text-md"><?= ($List['nama_karyawan']) ?></td>
-                            <td class="border border-gray-500 p-5 text-md"><?= ($List['jabatan']) ?></td>
-                            <td class="border border-gray-500 p-5 text-md"><?= ($List['jam_kerja']); ?></td>
-                        </tr>
-                        <?php endforeach;?>
-                    </tbody>
-                </table>
+
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card shadow-lg p-4">
+                            <h2 class="text-center mb-4">Form Input Nilai siswa</h2>
+                            <h4 class="text-center mb-4">1 = Manager, 2 = Supervisor, 3 = Staff</h4>
+                            <form method="POST">
+                                <div class="mb-3">
+                                    <label class="form-label">Nama Karyawan</label>
+                                    <input type="text" name="Nama" class="form-control" required>
+                                <div class="mb-3">
+                                    <label class="form-label">Jabatan</label>
+                                    <select name="jabatan" id="" class="w-100 p-3 border border-gray-300 rounded-md">
+                                        <option value="1">Manager</option>
+                                        <option value="2">Supervisor</option>
+                                        <option value="3">Staff</option>
+                                    </select>
+                                   
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Jam Kerja</label>
+                                    <input type="number" name="jamkerja" class="form-control" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Hitung Gaji</button>
+                            </form>
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-8">
+                        <div class="card shadow-lg p-4">
+                            <h2 class="text-center mb-4">Hasil Penilaian</h2>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover text-center">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Nama</th>
+                                            <th>Jabatan</th>
+                                            <th>Jam Kerja </th>
+                                            <th>Gaji</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        
+                                        foreach ($_SESSION['Karyawan'] as $Karyawan): {
+                                            $Nama = $Karyawan['Nama'];
+                                            $jabatan = $Karyawan['jabatan'];
+                                            $jamkerja = $Karyawan['jamkerja'];
+                                            $gaji_bersih = $Karyawan['gaji_bersih'];
+                                        }
+                                        ?>
+                                
+
+                                        <tr>
+                                            <td><?= $Nama ?></td>
+                                            <td><?= $jabatan ?></td>
+                                            <td><?= $jamkerja ?></td>
+                                            <td><?= $gaji_bersih ?></td>
+                                        </tr>
+                                        <?php endforeach; ?>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+
+                        <!-- Tombol untuk menghapus data sesi -->
+                        <form method="POST">
+                            <button type="submit" name="hapus_data" class="btn btn-danger w-100 mt-3">Hapus Semua Data</button>
+                        </form>
+                    </div>
+                </div>
             </div>
-            
-            <!-- Tombol untuk menghapus data sesi -->
-            <form method="POST">
-                <button type="submit" name="hapus_data" class="ml-5 w-175 p-3 mb-4 bg-red-500 text-white text-md rounded-md mt-5 hover:bg-red-200 cursor-pointer transition duration-500 text-center hover:text-black">Hapus Semua Data</button>
-            </form>
         </div>
     </div>
 </body>
+
+
 </html>
